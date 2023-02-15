@@ -1,8 +1,6 @@
 function()
-    local energy = UnitPower("player" , 3) --  SPELL_POWER_ENERGY = 3
+    -- local energy = UnitPower("player" , 3) --  SPELL_POWER_ENERGY = 3
     local cp = UnitPower("player" , 4)  -- SPELL_POWER_COMBO_POINTS = 4
-    
-    local melee = (IsSpellInRange("Отравляющий укол", "target") == 1)
     
     -- sinister strike usable and not on cd
     local sinister_s, sinister_d = GetSpellCooldown(193315)
@@ -65,10 +63,30 @@ function()
     end
     local blade_u = IsUsableSpell(13877) and blade_c < 0.33
     
+    -- dispatch usable and not on cooldown
+    local dispatch_s, dispatch_d = GetSpellCooldown(2098)
+    local dispatch_c = 0
+    if dispatch_s ~= 0 or dispatch_d ~= 0 then
+        dispatch_c = dispatch_s + dispatch_d - GetTime()
+    end
+    local dispatch_u = IsUsableSpell(2098) and dispatch_c < 0.33
+    
+    -- normal invis active
+    local invis_a = (AuraUtil.FindAuraByName("Незаметность", "player") ~= nil)
+    -- vanish active
+    local vanish_a = (AuraUtil.FindAuraByName("Исчезновение", "player") ~= nil)
+    -- subterfuge active
+    local subterfuge_a = (AuraUtil.FindAuraByName("Увертка", "player") ~= nil)
+    -- shadow dance active
+    local shadowdance_a = (AuraUtil.FindAuraByName("Танец теней", "player") ~= nil)
+    -- in melee range
+    local melee = (IsSpellInRange("Отравляющий укол", "target") == 1)
+    
+    
     -- set 8 bits
     local bits = 0
     
-    if melee == true then
+    if dispatch_u == true then
         bits = bits + 2 ^ 0
     end
     
@@ -100,14 +118,34 @@ function()
         bits = bits + 2 ^ 7
     end
     
+    -- second set of bits
+    local bits2 = 0
+    
+    if melee == true then
+        bits2 = bits2 + 2 ^ 0
+    end
+    
+    if invis_a == true then
+        bits2 = bits2 + 2 ^ 1
+    end
+    
+    if vanish_a == true then
+        bits2 = bits2 + 2 ^ 2
+    end
+    
+    if subterfuge_a == true then
+        bits2 = bits2 + 2 ^ 3
+    end
+    
+    if shadowdance_a == true then
+        bits2 = bits2 + 2 ^ 4
+    end
+    
     local R = cp / 255
-    local G = energy / 255
-    local B = bits / 255
+    local G = bits / 255
+    local B = bits2 / 255
     
-    -- print(eyes_u)
-    
-    -- 1 pixel carries info on 8 spells, energy and active combopoints
+    -- 1 pixel carries info on 16 spells, combopoints 
     
     return R, G, B, 1
 end
-

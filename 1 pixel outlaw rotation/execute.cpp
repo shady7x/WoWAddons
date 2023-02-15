@@ -45,72 +45,80 @@ int main()
 
 	short mode;
 	std::cin >> mode;
-	
+
 	//..
 
 	if (mode == 2)
 	{
-		int sl = 70, sr = 33;
+		int sl = 100, sr = 33;
 		while (true) // rogue 2
 		{
 			if (GetAsyncKeyState(0x5))
 			{
 				_color = GetPixel(_hdc, 966, 326);
 				int cpoint = GetRValue(_color);
-				int energy = GetGValue(_color);
-				int cdbits = GetBValue(_color);
 
-				if (cpoint > 10 || energy > 200)
+				if (cpoint > 10)
 					continue;
 
-				bool inMelee = IsBitSet(cdbits, 0);
-				bool bSinister = IsBitSet(cdbits, 1); // basically energy >= 45 or ?
-				bool bAmbush = IsBitSet(cdbits, 2);   // ambush can only be used from invis and energy >= 50
-				bool bDice = IsBitSet(cdbits, 3);     // dice 45 sec cd and energy >= 25
-				bool bEyes = IsBitSet(cdbits, 4);     // eyes 45 sec cd and energy >= 25
-				bool bSnd = IsBitSet(cdbits, 5);      // snd less < 6 sec uptime and energy >= 25
-				bool bPistol = IsBitSet(cdbits, 6);   // proc up and energy >= 40
-				bool bBlade = IsBitSet(cdbits, 7);    // blade 30 sec cd and energy >= 15
+				int cdbits = GetGValue(_color);
 
-				if (inMelee)
+				if (IsBitSet(cdbits, 3)) // dice 45 sec cd and energy >= 25
 				{
-					if (bDice)
+					CastKey(0x59);
+					Sleep(sl + rand() % sr);
+				}
+				else
+				{
+					int cdbits2 = GetBValue(_color);
+
+					if (IsBitSet(cdbits2, 0)) // in melee range
 					{
-						CastKey(0x59);
-						Sleep(sl + rand() % sr);
-					}
-					else if (bBlade)
-					{
-						CastKey(0x47);
-						Sleep(sl + rand() % sr);
-					}
-					else if (bEyes && cpoint >= 5)
-					{
-						CastKey(0x52);
-						Sleep(sl + rand() % sr);
-					}
-					else if (bSnd && cpoint >= 5)
-					{
-						CastKey(0x33);
-						Sleep(sl + rand() % sr);
-					}
-					else if (bPistol && cpoint < 5)
-					{
-						CastKey(0x46);
-						Sleep(sl + rand() % sr);
-					}
-					else if (!bAmbush && cpoint < 5)
-					{
-						CastKey(0x31);
-						Sleep(sl + rand() % sr);
-					}
-					else if (energy > 30) // >= 35
-					{
-						CastKey(0x32);
-						Sleep(sl + rand() % sr);
+						if (!(IsBitSet(cdbits2, 1) || IsBitSet(cdbits2, 2) || IsBitSet(cdbits2, 3) || IsBitSet(cdbits2, 4))) // invis, vanish, subterfuge, shadowdance
+						{
+							if (IsBitSet(cdbits, 7)) // blade 30 sec cd and energy >= 15
+							{
+								CastKey(0x47);
+								Sleep(sl + rand() % sr);
+							}
+							else if (IsBitSet(cdbits, 4) && cpoint >= 5) // eyes 45 sec cd and energy >= 25
+							{
+								CastKey(0x52);
+								Sleep(sl + rand() % sr);
+							}
+							else if (IsBitSet(cdbits, 5) && cpoint >= 5) // snd less < 6 sec uptime and energy >= 25
+							{
+								CastKey(0x33);
+								Sleep(sl + rand() % sr);
+							}
+							else if (IsBitSet(cdbits, 6) && cpoint < 5) // proc up and energy >= 40
+							{
+								CastKey(0x46);
+								Sleep(sl + rand() % sr);
+							}
+							else if (IsBitSet(cdbits, 0) && cpoint >= 5) // dispatch usable and energy >= 35
+							{
+								CastKey(0x32);
+								Sleep(sl + rand() % sr);
+							}
+							else if (IsBitSet(cdbits, 1) && cpoint < 5) // sinister strike usable and energy >= 45
+							{
+								CastKey(0x31);
+								Sleep(sl + rand() % sr);
+							}
+						}
+						else if (IsBitSet(cdbits, 5) && cpoint >= 5) // snd less < 6 sec uptime and energy >= 25
+						{
+							CastKey(0x33);
+							Sleep(sl + rand() % sr);
+						}
+						else if (IsBitSet(cdbits, 2)) // ambush usable and energy >= 50
+						{
+							CastKey(0x32);
+							Sleep(sl + rand() % sr);
+						}
 					}
 				}
-
 				Sleep(1);
 			}
 		}
