@@ -116,7 +116,9 @@ function()
                 dice_u = false
             end
             
-        end
+        else
+            dice_u = false
+        end        
         
     end
     
