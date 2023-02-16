@@ -89,26 +89,14 @@ function()
     if dice_u == true then
         
         -- prevent buffs from shuffling when not needed
-        local cnt = 0
         
         local truebearing_a = (AuraUtil.FindAuraByName("Истинный азимут", "player") ~= nil) -- True Bearing 
         local skullbones_a = (AuraUtil.FindAuraByName("Череп с костями", "player") ~= nil) -- Skull and Crossbones
         local broadside_a = (AuraUtil.FindAuraByName("Бортовой залп", "player") ~= nil) -- Broadside
         
-        if truebearing_a == true then
-            cnt = cnt + 1
-            dice_u = false
-        end
-        if skullbones_a == true then
-            cnt = cnt + 1
-            dice_u = false
-        end
-        if broadside_a == true then
-            cnt = cnt + 1
-            dice_u = false
-        end
-        
-        if dice_u == true then -- still true after ^ checks
+        if truebearing_a == false and skullbones_a == false and broadside_a == false then
+            
+            local cnt = 0
             
             local grandmelee_a = (AuraUtil.FindAuraByName("Великая битва", "player") ~= nil) -- Grand Melee 
             local treasure_a = (AuraUtil.FindAuraByName("Зарытое сокровище", "player") ~= nil) -- Buried Treasure
@@ -124,7 +112,7 @@ function()
                 cnt = cnt + 1
             end
             
-            if cnt > 1 then
+            if cnt > 1 then -- 2 bad buffs are ok too
                 dice_u = false
             end
             
