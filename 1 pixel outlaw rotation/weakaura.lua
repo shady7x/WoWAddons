@@ -1,6 +1,7 @@
 function()
     -- local energy = UnitPower("player" , 3) --  SPELL_POWER_ENERGY = 3
     local cp = UnitPower("player" , 4)  -- SPELL_POWER_COMBO_POINTS = 4
+    local cp_mx = UnitPowerMax("player", 4)
     
     -- sinister strike usable and not on cd
     local sinister_s, sinister_d = GetSpellCooldown(193315)
@@ -76,11 +77,13 @@ function()
     -- vanish active
     local vanish_a = (AuraUtil.FindAuraByName("Исчезновение", "player") ~= nil)
     -- subterfuge active
-    local subterfuge_a = (AuraUtil.FindAuraByName("Увертка", "player") ~= nil)
+    local subterfuge_a = (AuraUtil.FindAuraByName("Увертка", "player") ~= nil) -- might wanna check remaining time as in pistol proc
     -- shadow dance active
-    local shadowdance_a = (AuraUtil.FindAuraByName("Танец теней", "player") ~= nil)
+    local shadowdance_a = (AuraUtil.FindAuraByName("Танец теней", "player") ~= nil) -- same
     -- in melee range
     local melee = (IsSpellInRange("Отравляющий укол", "target") == 1)
+    -- audacity proc
+    local audacity_a = (AuraUtil.FindAuraByName("Дерзость", "player") ~= nil) -- same
     
     
     -- set 8 bits
@@ -141,11 +144,18 @@ function()
         bits2 = bits2 + 2 ^ 4
     end
     
+    if audacity_a == true then
+        bits2 = bits2 + 2 ^ 5
+    end
+    
+    
+    cp = cp + (cp_mx - 5) * 10
+    
     local R = cp / 255
     local G = bits / 255
-    local B = bits2 / 255
+    local B = bits2 / 255 -- or * 0.00392156862745098
     
-    -- 1 pixel carries info on 16 spells, combopoints 
+    -- 1 pixel carries info on 16 spells, current and max combopoints 
     
     return R, G, B, 1
 end

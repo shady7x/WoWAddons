@@ -55,11 +55,24 @@ int main()
 		{
 			if (GetAsyncKeyState(0x5))
 			{
-				_color = GetPixel(_hdc, 966, 326);
-				int cpoint = GetRValue(_color);
+				_color = GetPixel(_hdc, 970, 7);
+				int cp = GetRValue(_color);
+				int cp_mx = 5;
+				if (cp >= 20)
+				{
+					cp -= 20;
+					cp_mx = 7;
+				}
+				else if (cp >= 10)
+				{
+					cp -= 10;
+					cp_mx = 6;
+				}
 
-				if (cpoint > 10)
+				if (cp > cp_mx)
 					continue;
+
+				bool cp_filled = (cp + 1 >= cp_mx);
 
 				int cdbits = GetGValue(_color);
 
@@ -81,40 +94,61 @@ int main()
 								CastKey(0x47);
 								Sleep(sl + rand() % sr);
 							}
-							else if (IsBitSet(cdbits, 4) && cpoint >= 5) // eyes 45 sec cd and energy >= 25
+							else if (cp_filled)
 							{
-								CastKey(0x52);
-								Sleep(sl + rand() % sr);
-							}
-							else if (IsBitSet(cdbits, 5) && cpoint >= 5) // snd less < 6 sec uptime and energy >= 25
+								if (IsBitSet(cdbits, 4)) // eyes 45 sec cd and energy >= 25
+								{
+									CastKey(0x52);
+									Sleep(sl + rand() % sr);
+								}
+								else if (IsBitSet(cdbits, 5)) // snd less < 6 sec uptime and energy >= 25
+								{
+									CastKey(0x33);
+									Sleep(sl + rand() % sr);
+								}
+								else if (IsBitSet(cdbits, 0)) // dispatch usable and energy >= 35
+								{
+									CastKey(0x32);
+									Sleep(sl + rand() % sr);
+								}
+							} // cp not filled
+							else if (IsBitSet(cdbits2, 5)) // audacity proc up
 							{
-								CastKey(0x33);
-								Sleep(sl + rand() % sr);
-							}
-							else if (IsBitSet(cdbits, 6) && cpoint < 5) // proc up and energy >= 40
+								if (IsBitSet(cdbits, 2)) // ambush usable and energy >= 50
+								{
+									CastKey(0x55);
+									Sleep(sl + rand() % sr);
+								} // TODO: this provides less downtime but if this noticable affects dps just remove 
+								else if (IsBitSet(cdbits, 6)) // pistol proc up and energy >= 40
+								{
+									CastKey(0x46);
+									Sleep(sl + rand() % sr);
+								}
+							} // audacity proc not present
+							else if (IsBitSet(cdbits, 6)) // pistol proc up and energy >= 40
 							{
 								CastKey(0x46);
 								Sleep(sl + rand() % sr);
 							}
-							else if (IsBitSet(cdbits, 0) && cpoint >= 5) // dispatch usable and energy >= 35
-							{
-								CastKey(0x32);
-								Sleep(sl + rand() % sr);
-							}
-							else if (IsBitSet(cdbits, 1) && cpoint < 5) // sinister strike usable and energy >= 45
+							else if (IsBitSet(cdbits, 1)) // sinister strike usable and energy >= 45
 							{
 								CastKey(0x31);
 								Sleep(sl + rand() % sr);
 							}
 						}
-						else if (IsBitSet(cdbits, 5) && cpoint >= 5) // snd less < 6 sec uptime and energy >= 25
+						else if (IsBitSet(cdbits, 4) && cp_filled) // eyes 45 sec cd and energy >= 25
+						{
+							CastKey(0x52);
+							Sleep(sl + rand() % sr);
+						}
+						else if (IsBitSet(cdbits, 5) && cp_filled) // snd less < 6 sec uptime and energy >= 25
 						{
 							CastKey(0x33);
 							Sleep(sl + rand() % sr);
 						}
 						else if (IsBitSet(cdbits, 2)) // ambush usable and energy >= 50
 						{
-							CastKey(0x32);
+							CastKey(0x32); // could use CastKey(0x55) but it doesnt matter here
 							Sleep(sl + rand() % sr);
 						}
 					}
