@@ -2,6 +2,7 @@ function()
     -- local energy = UnitPower("player" , 3) --  SPELL_POWER_ENERGY = 3
     local cp = UnitPower("player" , 4)  -- SPELL_POWER_COMBO_POINTS = 4
     local cp_mx = UnitPowerMax("player", 4)
+    local mxp_stacks = 3
     
     -- sinister strike usable and not on cd
     local sinister_s, sinister_d = GetSpellCooldown(193315)
@@ -22,13 +23,18 @@ function()
     end
     local dice_u = IsUsableSpell(315508) and dice_c < 0.33 
     
-    -- between the eyes usable and not on cd
+    -- between the eyes is not present on the target, usable and not on cd
     local eyes_s, eyes_d = GetSpellCooldown(315341)
     local eyes_c = 0
     if eyes_s ~= 0 or eyes_d ~= 0 then
         eyes_c = eyes_s + eyes_d - GetTime()
     end
-    local eyes_u = IsUsableSpell(315341) and eyes_c < 0.33
+    local eyes_timeleft = 0
+    local _, _, _, _, eyes_duration, eyes_expiration, eyes_source = AuraUtil.FindAuraByName("Промеж глаз", "target", "HARMFUL")
+    if eyes_duration ~= nil and eyes_source == "player" then -- our debuff
+        eyes_timeleft = eyes_expiration - GetTime()
+    end
+    local eyes_u = IsUsableSpell(315341) and eyes_c < 0.33 and eyes_timeleft < 1.5
     
     -- slice and dice usable, not on cd and uptime == 0 or < 6
     local snd_s, snd_d = GetSpellCooldown(315496)
@@ -50,11 +56,11 @@ function()
         pistol_c = pistol_s + pistol_d - GetTime()
     end
     local pistol_timeleft = 0
-    local _, _, _, _, pistol_duration, pistol_expiration = AuraUtil.FindAuraByName("Замечательная возможность", "player")
+    local _, _, pistol_stacks, _, pistol_duration, pistol_expiration = AuraUtil.FindAuraByName("Замечательная возможность", "player")
     if pistol_duration ~= nil then
         pistol_timeleft = pistol_expiration - GetTime()
     end
-    local pistol_u = IsUsableSpell(185763) and pistol_c < 0.33 and pistol_timeleft > 0.5
+    local pistol_u = IsUsableSpell(185763) and pistol_c < 0.33 and pistol_timeleft > 0.5 and (pistol_stacks >= mxp_stacks or pistol_timeleft < 5.0)
     
     -- blade flurry usable and not on cooldown
     local blade_s, blade_d = GetSpellCooldown(13877)
@@ -62,7 +68,8 @@ function()
     if blade_s ~= 0 or blade_d ~= 0 then
         blade_c = blade_s + blade_d - GetTime()
     end
-    local blade_u = IsUsableSpell(13877) and blade_c < 0.33
+    local blade_a = (AuraUtil.FindAuraByName("Шквал клинков", "player") ~= nil) -- Blade Flurry
+    local blade_u = IsUsableSpell(13877) and blade_c < 0.33 and blade_a == false
     
     -- dispatch usable and not on cooldown
     local dispatch_s, dispatch_d = GetSpellCooldown(2098)
@@ -85,6 +92,7 @@ function()
     -- audacity proc
     local audacity_a = (AuraUtil.FindAuraByName("Дерзость", "player") ~= nil) -- same
     
+    -- local cost = GetSpellPowerCost(185763)[1].cost
     
     if dice_u == true then
         
@@ -104,12 +112,17 @@ function()
             
             if grandmelee_a == true then
                 cnt = cnt + 1
+                
+                if snd_timeleft < 6 then
+                    cnt = cnt + 1 -- twice as good if we dont have an snd or its about to expire
+                end
+                
             end
             if treasure_a == true then
                 cnt = cnt + 1
             end
-            if precision == true then
-                cnt = cnt + 1
+            if precision_a == true then
+                cnt = cnt + 2
             end
             
             if cnt > 1 then -- 2 bad buffs are ok too
@@ -122,66 +135,67 @@ function()
         
     end
     
+    
     -- set 8 bits
     local bits = 0
     
     if dispatch_u == true then
-        bits = bits + 2 ^ 0
+        bits = bits + 1   -- 2^0
     end
     
     if sinister_u == true then
-        bits = bits + 2 ^ 1
+        bits = bits + 2   -- 2^1
     end
     
     if ambush_u == true then
-        bits = bits + 2 ^ 2
+        bits = bits + 4   -- 2^2
     end
     
     if dice_u == true then
-        bits = bits + 2 ^ 3
+        bits = bits + 8   -- 2^3
     end
     
     if eyes_u == true then
-        bits = bits + 2 ^ 4
+        bits = bits + 16  -- 2^4
     end
     
     if snd_u == true then
-        bits = bits + 2 ^ 5
+        bits = bits + 32  -- 2^5
     end
     
     if pistol_u == true then
-        bits = bits + 2 ^ 6
+        bits = bits + 64  -- 2^6
     end
     
     if blade_u == true then
-        bits = bits + 2 ^ 7
+        bits = bits + 128 -- 2^7
     end
     
     -- second set of bits
     local bits2 = 0
     
     if melee == true then
-        bits2 = bits2 + 2 ^ 0
+        bits2 = bits2 + 1
     end
     
     if invis_a == true then
-        bits2 = bits2 + 2 ^ 1
+        bits2 = bits2 + 2
     end
     
     if vanish_a == true then
-        bits2 = bits2 + 2 ^ 2
+        bits2 = bits2 + 4
     end
     
     if subterfuge_a == true then
-        bits2 = bits2 + 2 ^ 3
+        bits2 = bits2 + 8
     end
     
     if shadowdance_a == true then
-        bits2 = bits2 + 2 ^ 4
+        bits2 = bits2 + 16
     end
     
     if audacity_a == true then
-        bits2 = bits2 + 2 ^ 5
+        bits2 = bits2 + 32
     end
     
     
