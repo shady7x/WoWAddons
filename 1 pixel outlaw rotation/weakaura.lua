@@ -30,7 +30,7 @@ function()
         eyes_c = eyes_s + eyes_d - GetTime()
     end
     local eyes_timeleft = 0
-    local _, _, _, _, eyes_duration, eyes_expiration, eyes_source = AuraUtil.FindAuraByName("Промеж глаз", "target", "HARMFUL")
+    local _, _, _, _, eyes_duration, eyes_expiration, eyes_source = AuraUtil.FindAuraByName("Промеж глаз", "target", "PLAYER|HARMFUL")
     if eyes_duration ~= nil and eyes_source == "player" then -- our debuff
         eyes_timeleft = eyes_expiration - GetTime()
     end
