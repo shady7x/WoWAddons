@@ -30,8 +30,8 @@ function()
         eyes_c = eyes_s + eyes_d - GetTime()
     end
     local eyes_timeleft = 0
-    local _, _, _, _, eyes_duration, eyes_expiration, eyes_source = AuraUtil.FindAuraByName("Промеж глаз", "target", "PLAYER|HARMFUL")
-    if eyes_duration ~= nil and eyes_source == "player" then -- our debuff
+    local _, _, _, _, eyes_duration, eyes_expiration = AuraUtil.FindAuraByName("Промеж глаз", "target", "PLAYER|HARMFUL")
+    if eyes_duration ~= nil then
         eyes_timeleft = eyes_expiration - GetTime()
     end
     local eyes_u = IsUsableSpell(315341) and eyes_c < 0.33 and eyes_timeleft < 1.5
